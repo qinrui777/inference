@@ -1,0 +1,45 @@
+# ######################################################################
+# xinference docker-compose examples
+# ######################################################################
+
+name: xinference
+
+networks:
+  xinference-net:
+    driver: bridge
+
+services:
+  # Xinference service
+  xinference:
+    image: xprobe/xinference:${VERSION:-latest}
+    container_name: xinference
+    restart: always
+    environment:
+      XINFERENCE_MODEL_SRC: ${XINFERENCE_MODEL_SRC:-modelscope}
+    volumes:
+      - ${HOST_XINFERENCE_BASE}/.xinference:/root/.xinference
+      - ${HOST_XINFERENCE_BASE}/.cache/huggingface:/root/.cache/huggingface
+      - ${HOST_XINFERENCE_BASE}/.cache/modelscope:/root/.cache/modelscope
+    ports:
+      - "9997:9997"
+    networks:
+      - xinference-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    command: xinference-local -H 0.0.0.0 --log-level debug
+
+  # Optional pypiserver service; enable with COMPOSE_PROFILES=pypiserver
+  pypiserver-default:
+    profiles:
+      - pypiserver
+    image: xprobe/pypiserver:latest
+    container_name: pypiserver
+    networks:
+      - xinference-net
+    ports:
+      - "8080:8080"
