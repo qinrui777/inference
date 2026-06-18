@@ -29,7 +29,7 @@ ALL=$(jq -r '
 
 # Step 3: filter by platform, exclude opposite arch entries
 # Step 4: strip conditional markers
-PACKAGES=$(echo "$ALL" | grep -v "platform_machine == \"$EXCLUDE_ARCH\"" | sed 's/ ; .*//')
+PACKAGES=$(echo "$ALL" | sed "/platform_machine == \"$EXCLUDE_ARCH\"/d; s/ ; .*//")
 
 # Step 5: expand placeholders to real pip-installable specs
 echo "$PACKAGES" | while IFS= read -r pkg; do

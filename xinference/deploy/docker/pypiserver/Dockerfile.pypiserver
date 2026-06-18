@@ -68,8 +68,5 @@ RUN pip cache purge \
 # Stage 2 — minimal pypiserver runtime
 # ============================================================================
 FROM pypiserver/pypiserver:latest
-
-COPY --from=downloader /data/packages/ /data/packages/
-RUN chown -R pypiserver:pypiserver /data/packages
-
+COPY --chown=pypiserver:pypiserver --from=downloader /data/packages/ /data/packages/
 EXPOSE 8080
